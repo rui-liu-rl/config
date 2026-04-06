@@ -61,7 +61,7 @@ export PATH="$HOME/.local/bin:$PATH"
 bindkey -v
 bindkey '\t\t' autosuggest-accept
 
-. "$HOME/.local/bin/env"
+[ -f "$HOME/.local/bin/env" ] && . "$HOME/.local/bin/env"
 
 # Git related
 function c() {

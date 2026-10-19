@@ -1,0 +1,82 @@
+// Mirrors ~/.wezterm.lua: Catppuccin Frappe, tab bar at the bottom, Ctrl+A leader.
+// Defaults are cleared so Zellij doesn't steal Ctrl+P/N/T/H/O/S/G/Q from the shell.
+
+theme "catppuccin-frappe-subtle"
+default_layout "minimal"   // layouts/minimal.kdl: tabs-only bar at the bottom (zjstatus)
+pane_frames false
+show_startup_tips false
+show_release_notes false
+on_force_close "quit"      // closing the Ghostty window ends the session, like WezTerm
+session_serialization false
+
+keybinds clear-defaults=true {
+    normal {
+        bind "Ctrl a" { SwitchToMode "Tmux"; }
+    }
+    tmux {
+        // Ctrl+A twice sends a literal Ctrl+A (jump to start of line)
+        bind "Ctrl a" { Write 1; SwitchToMode "Normal"; }
+
+        // Splits
+        bind "\\" { NewPane "Right"; SwitchToMode "Normal"; }
+        bind "-" { NewPane "Down"; SwitchToMode "Normal"; }
+
+        // Tabs
+        bind "c" { NewTab; SwitchToMode "Normal"; }
+        bind "x" { CloseFocus; SwitchToMode "Normal"; }
+        bind "p" { GoToPreviousTab; SwitchToMode "Normal"; }
+        bind "n" { GoToNextTab; SwitchToMode "Normal"; }
+        bind "," { SwitchToMode "RenameTab"; TabNameInput 0; }
+
+        // Pane navigation (hjkl)
+        bind "h" { MoveFocus "Left"; SwitchToMode "Normal"; }
+        bind "j" { MoveFocus "Down"; SwitchToMode "Normal"; }
+        bind "k" { MoveFocus "Up"; SwitchToMode "Normal"; }
+        bind "l" { MoveFocus "Right"; SwitchToMode "Normal"; }
+
+        // Pane resizing (arrows; stays in leader mode so you can tap repeatedly)
+        bind "Left" { Resize "Increase Left"; }
+        bind "Right" { Resize "Increase Right"; }
+        bind "Down" { Resize "Increase Down"; }
+        bind "Up" { Resize "Increase Up"; }
+
+        // Leader + number: 0 = first tab, like WezTerm
+        bind "0" { GoToTab 1; SwitchToMode "Normal"; }
+        bind "1" { GoToTab 2; SwitchToMode "Normal"; }
+        bind "2" { GoToTab 3; SwitchToMode "Normal"; }
+        bind "3" { GoToTab 4; SwitchToMode "Normal"; }
+        bind "4" { GoToTab 5; SwitchToMode "Normal"; }
+        bind "5" { GoToTab 6; SwitchToMode "Normal"; }
+        bind "6" { GoToTab 7; SwitchToMode "Normal"; }
+        bind "7" { GoToTab 8; SwitchToMode "Normal"; }
+        bind "8" { GoToTab 9; SwitchToMode "Normal"; }
+        bind "9" { GoToTab 10; SwitchToMode "Normal"; }
+
+        // Extras: zoom pane, scrollback/search mode
+        bind "z" { ToggleFocusFullscreen; SwitchToMode "Normal"; }
+        bind "[" { SwitchToMode "Scroll"; }
+
+        bind "Esc" "Enter" { SwitchToMode "Normal"; }
+    }
+    renametab {
+        bind "Enter" { SwitchToMode "Normal"; }
+        bind "Esc" { UndoRenameTab; SwitchToMode "Normal"; }
+    }
+    scroll {
+        bind "j" "Down" { ScrollDown; }
+        bind "k" "Up" { ScrollUp; }
+        bind "Ctrl d" { HalfPageScrollDown; }
+        bind "Ctrl u" { HalfPageScrollUp; }
+        bind "/" { SwitchToMode "EnterSearch"; SearchInput 0; }
+        bind "Esc" "q" { ScrollToBottom; SwitchToMode "Normal"; }
+    }
+    entersearch {
+        bind "Enter" { SwitchToMode "Search"; }
+        bind "Esc" { SwitchToMode "Scroll"; }
+    }
+    search {
+        bind "n" { Search "down"; }
+        bind "N" { Search "up"; }
+        bind "Esc" "q" { ScrollToBottom; SwitchToMode "Normal"; }
+    }
+}

@@ -1,0 +1,17 @@
+// Catppuccin Frappe, but the pane dividers are grey (#737994) instead of green,
+// matching WezTerm's split color.
+themes {
+    catppuccin-frappe-subtle {
+        fg "#c6d0f5"
+        bg "#626880"
+        black "#292c3c"
+        red "#e78284"
+        green "#737994"
+        yellow "#e5c890"
+        blue "#8caaee"
+        magenta "#f4b8e4"
+        cyan "#99d1db"
+        white "#c6d0f5"
+        orange "#ef9f76"
+    }
+}

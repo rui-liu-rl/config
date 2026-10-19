@@ -7,7 +7,11 @@ local config = wezterm.config_builder()
 
 -- ====================== APPEARANCE ======================
 config.color_scheme = "Catppuccin Frappe"
-config.font = wezterm.font("MesloLGS Nerd Font Mono")
+config.font = wezterm.font_with_fallback({
+	"MesloLGS Nerd Font Mono",
+	"Heiti SC",         -- Simplified Chinese fallback (system font)
+	"Arial Unicode MS", -- catch-all for remaining Unicode
+})
 config.font_size = 13
 
 config.window_decorations = "RESIZE"

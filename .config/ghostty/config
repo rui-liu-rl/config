@@ -1,0 +1,22 @@
+# Ported from ~/.wezterm.lua. Tabs/splits/Ctrl+A keys live in Zellij
+# (~/.config/zellij/config.kdl), which draws the tab bar at the bottom.
+
+# ====================== APPEARANCE ======================
+theme = Catppuccin Frappe
+font-family = "MesloLGS Nerd Font Mono"
+font-size = 13
+# CJK falls back to system fonts (PingFang/Heiti) automatically on macOS
+
+background-opacity = 1.0
+
+# Cursor (WezTerm default: steady block)
+cursor-style = block
+cursor-style-blink = false
+shell-integration-features = no-cursor
+
+# Window: no titlebar, like WezTerm's window_decorations = "RESIZE"
+macos-titlebar-style = hidden
+
+# ====================== ZELLIJ ======================
+# Every Ghostty window opens straight into Zellij (bottom tab bar, Ctrl+A leader)
+command = /opt/homebrew/bin/zellij

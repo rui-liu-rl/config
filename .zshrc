@@ -22,6 +22,7 @@ source $ZSH/oh-my-zsh.sh
 alias vim='nvim'
 alias vi='nvim'
 alias iv='nvim'
+alias code='cursor'
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
@@ -39,11 +40,11 @@ lazy_load_nvm() {
   fi
 }
 
-nvm()  { lazy_load_nvm; nvm $@; }
-node() { lazy_load_nvm; node $@; }
-npm()  { lazy_load_nvm; npm $@; }
-npx()  { lazy_load_nvm; npx $@; }
-yarn() { lazy_load_nvm; yarn $@; }
+nvm()  { lazy_load_nvm; nvm "$@"; }
+node() { lazy_load_nvm; node "$@"; }
+npm()  { lazy_load_nvm; npm "$@"; }
+npx()  { lazy_load_nvm; npx "$@"; }
+yarn() { lazy_load_nvm; yarn "$@"; }
 
 # Tools
 export FZF_DEFAULT_OPTS=" \
@@ -52,10 +53,15 @@ export FZF_DEFAULT_OPTS=" \
 --color=marker:#f2d5cf,fg+:#c6d0f5,prompt:#ca9ee6,hl+:#e78284"
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-eval "$(zoxide init zsh --cmd cd)"
-source <(fzf --zsh)
+# Non-login shells skip ~/.zprofile, so make sure Homebrew is on PATH
+(( $+commands[brew] )) || { [[ -x /opt/homebrew/bin/brew ]] && eval "$(/opt/homebrew/bin/brew shellenv)" }
+(( $+commands[fzf] )) && source <(fzf --zsh)
 
 export PATH="$HOME/.local/bin:$PATH"
+# Newest nvm-installed node on PATH without loading nvm (lazy loader above handles `nvm` itself)
+_node_bins=($NVM_DIR/versions/node/*/bin(Nn))
+(( ${#_node_bins} )) && export PATH="${_node_bins[-1]}:$PATH"
+unset _node_bins
 
 # extra key bindings
 bindkey -v
@@ -73,3 +79,6 @@ function c() {
   git add -A
   git commit -m "$*"
 }
+
+# zoxide must be initialized last
+(( $+commands[zoxide] )) && eval "$(zoxide init zsh --cmd cd)"

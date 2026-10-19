@@ -1,0 +1,26 @@
+// Bottom bar with just the tabs. No session name or swap-layout label, and the
+// mode only shows while it's not Normal (e.g. after pressing the Ctrl+A leader).
+// Background matches Ghostty's Catppuccin Frappe base (#303446), so only the
+// text is colored.
+layout {
+    default_tab_template {
+        children
+        pane size=1 borderless=true {
+            plugin location="https://github.com/dj95/zjstatus/releases/download/v0.25.0/zjstatus.wasm" {
+                format_left  "#[bg=#303446] {mode}{tabs}"
+                format_right ""
+                format_space "#[bg=#303446]"
+
+                mode_normal        ""
+                mode_tmux          "#[bg=#303446,fg=#8caaee,bold] LEADER   "
+                mode_scroll        "#[bg=#303446,fg=#81c8be,bold] SCROLL   "
+                mode_enter_search  "#[bg=#303446,fg=#81c8be,bold] SEARCH   "
+                mode_search        "#[bg=#303446,fg=#81c8be,bold] SEARCH   "
+                mode_rename_tab    "#[bg=#303446,fg=#f4b8e4,bold] RENAME   "
+
+                tab_normal "#[bg=#303446,fg=#737994]   {name}   "
+                tab_active "#[bg=#303446,fg=#c6d0f5,bold]   {name}   "
+            }
+        }
+    }
+}

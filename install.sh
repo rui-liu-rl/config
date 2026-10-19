@@ -1,51 +1,87 @@
 #!/bin/bash
+# Set up a new Mac: Homebrew + packages, oh-my-zsh + plugins, Node, uv, and
+# symlinks from $HOME into this repo. Safe to re-run.
 set -euo pipefail
 
-# ====== Install packages ======
-brew install --cask font-meslo-lg-nerd-font
-brew install fzf direnv zoxide uv
+DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+BACKUP_DIR="$HOME/dotfiles_backup_$(date +%Y%m%d_%H%M%S)"
 
-# Zsh plugin
-ZSH_CUSTOM="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
-git clone https://github.com/zsh-users/zsh-autosuggestions "$ZSH_CUSTOM/plugins/zsh-autosuggestions" || true
+step() { printf '\n==> %s\n' "$*"; }
 
-# ====== Setup symlinks safely ======
+# ====== Homebrew ======
+step "Homebrew"
+if ! command -v brew >/dev/null 2>&1; then
+  if [ ! -x /opt/homebrew/bin/brew ]; then
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  fi
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+fi
+# Login shells need brew on PATH too (the .zshrc fallback only covers interactive shells)
+grep -qs 'brew shellenv' "$HOME/.zprofile" || echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> "$HOME/.zprofile"
+brew bundle --file="$DOTFILES_DIR/Brewfile" --no-upgrade
 
-DOTFILES_DIR="$(pwd)"
-
-# Verify we're in correct directory
-if [ ! -d "$DOTFILES_DIR/.git" ]; then
-  echo "Error: Please run this script from your dotfiles repository root!"
-  exit 1
+# ====== oh-my-zsh, powerlevel10k, plugins ======
+step "oh-my-zsh"
+if [ ! -d "$HOME/.oh-my-zsh" ]; then
+  # KEEP_ZSHRC: don't overwrite our .zshrc; RUNZSH: don't drop into a new shell
+  RUNZSH=no CHSH=no KEEP_ZSHRC=yes \
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 fi
 
-# Backup existing dotfiles to a timestamped directory
-BACKUP_DIR="$HOME/dotfiles_backup_$(date +%Y%m%d_%H%M%S)"
-mkdir -p "$BACKUP_DIR"
-echo "Backing up existing files to $BACKUP_DIR..."
+ZSH_CUSTOM="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
+clone_if_missing() {
+  [ -d "$2" ] || git clone --depth=1 "$1" "$2"
+}
+clone_if_missing https://github.com/romkatv/powerlevel10k "$ZSH_CUSTOM/themes/powerlevel10k"
+clone_if_missing https://github.com/zsh-users/zsh-autosuggestions "$ZSH_CUSTOM/plugins/zsh-autosuggestions"
 
-# Function to safely symlink files/directories
-symlink_dotfile() {
-  local src="$1"
-  local dst="$2"
+# ====== Node (nvm) ======
+step "Node"
+export NVM_DIR="$HOME/.nvm"
+mkdir -p "$NVM_DIR"
+# nvm.sh isn't written for `set -u`
+set +u
+. "$(brew --prefix nvm)/nvm.sh"
+nvm install 24
+nvm alias default 24
+set -u
+
+# ====== uv ======
+step "uv"
+if [ ! -x "$HOME/.local/bin/uv" ]; then
+  curl -LsSf https://astral.sh/uv/install.sh | sh
+fi
+
+# ====== Symlinks ======
+step "Symlinks"
+link() {
+  local src="$DOTFILES_DIR/$1"
+  local dst="$HOME/$1"
+
+  # Already pointing at the repo: nothing to do
+  if [ -L "$dst" ] && [ "$(readlink "$dst")" = "$src" ]; then
+    echo "ok        ~/$1"
+    return
+  fi
 
   if [ -e "$dst" ] || [ -L "$dst" ]; then
-    echo "Backing up $(basename "$dst")"
-    mv "$dst" "$BACKUP_DIR/"
+    mkdir -p "$BACKUP_DIR/$(dirname "$1")"
+    mv "$dst" "$BACKUP_DIR/$1"
+    echo "backed up ~/$1 -> $BACKUP_DIR/$1"
   fi
 
-  echo "Creating symlink: $dst -> $src"
+  mkdir -p "$(dirname "$dst")"
   ln -s "$src" "$dst"
-
-  if [ -L "$dst" ]; then
-    echo "✅ Created symlink: $(basename "$dst")"
-  else
-    echo "❌ Failed to create symlink: $(basename "$dst")"
-  fi
+  echo "linked    ~/$1"
 }
 
-# Symlink .zshrc and .wezterm.lua
-symlink_dotfile "$DOTFILES_DIR/.zshrc" "$HOME/.zshrc"
-symlink_dotfile "$DOTFILES_DIR/.wezterm.lua" "$HOME/.wezterm.lua"
+link .zshrc
+link .p10k.zsh
+link .gitconfig
+link .wezterm.lua
+link .config/ghostty
+link .config/zellij
+link .config/nvim
+link .config/git
 
-echo "🎉 Dotfiles setup completed!"
+printf '\nDone. Open Ghostty to start.\n'

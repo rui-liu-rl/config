@@ -3,7 +3,7 @@
 Dotfiles. On a new Mac:
 
 ```sh
-git clone git@github.com:rliu054/config.git ~/codes/rui/config
+git clone https://github.com/rui-liu-rl/config.git ~/codes/rui/config
 ~/codes/rui/config/install.sh
 ```
 

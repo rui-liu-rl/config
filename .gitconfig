@@ -2,3 +2,6 @@
 	autocrlf = input
 [credential]
 	helper = store
+# Identity (user.name / user.email) lives in the untracked ~/.gitconfig.local
+[include]
+	path = ~/.gitconfig.local
